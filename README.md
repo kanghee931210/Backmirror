@@ -13,6 +13,9 @@ check your This is a rearview mirror that automatically checks what's behind you
 
 + python Backmirror.py 
 
+If you want to quit the app, press ESC
+
+### 
 ## Parameter Info
 
 ### The rearview mirror currently has a total of 10 parameters.
@@ -39,6 +42,9 @@ check your This is a rearview mirror that automatically checks what's behind you
   + monitor is a parameter that determines whether to display the webcam on the screen. If False, the webcam will not be output. The current default is True.
  
 - - - 
+
+## If you have any questions, please email me anytime. kanghe931210@gmail.com
+
 
 ### ref 
 
