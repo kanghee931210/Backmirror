@@ -75,6 +75,7 @@ else:
     net.load(model_path)
 
 timer = Timer()
+print('If you want to quit the app, press ESC ')
 while True:
     ret, frame = capture.read()
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
