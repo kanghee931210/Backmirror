@@ -12,6 +12,9 @@ import time
 
 import argparse
 
+import threading
+import datetime
+
 parser = argparse.ArgumentParser(description='Back Mirror')
 
 parser.add_argument('--net_type', default="RFB", type=str,
@@ -37,12 +40,9 @@ parser.add_argument('--monitor', default=True, type=int,
 
 args = parser.parse_args()
 
-
-
 capture = cv2.VideoCapture(0)
 capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-# model_path = "weight/version-slim-640.pth"
 
 define_img_size(args.input_size)
 net_type = args.net_type
@@ -54,6 +54,7 @@ delay_time = args.delay
 detect_num = args.detect
 detect_num = max(detect_num,1)
 monitor_p = args.monitor
+
 
 if net_type == 'slim':
     if net_size == '320':
@@ -74,18 +75,25 @@ if test_device == 'cpu':
 else:
     net.load(model_path)
 
-timer = Timer()
-print('If you want to quit the app, press ESC ')
+last_opened = datetime.datetime.min
+last_predict_time = datetime.datetime.min
+
 while True:
     ret, frame = capture.read()
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    timer.start()
-    boxes, labels, probs = predictor.predict(image, 1000 / 2, 0.8)
-    interval = timer.end()
-    # print('Time: {:.6f}s, Detect Objects: {:d}.'.format(interval, labels.size(0)))
-    if labels.size(0) >= detect_num:
-        webbrowser.open(web_site, new=1)
-        time.sleep(delay_time)
+
+    current_time = datetime.datetime.now()
+    predict_interval = current_time - last_predict_time
+
+    # predict 1s per 3 times per second
+    if predict_interval.total_seconds() > 0.33:
+        last_predict_time = current_time
+        boxes, labels, probs = predictor.predict(image, 1000 / 2, 0.8)
+
+        time_diff = datetime.datetime.now() - last_opened
+        if labels.size(0) >= detect_num and time_diff.total_seconds() > delay_time:
+            last_opened = datetime.datetime.now()
+            webbrowser.open(web_site, new=1)
 
     for i in range(boxes.size(0)):
         box = list(map(int,boxes[i, :]))#boxes[i, :].type(int)
